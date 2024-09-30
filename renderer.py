@@ -11,10 +11,12 @@ from utility import colors
 class Viewport:
 	def __init__(self, camerapos, window):
 		focal_length = 1
+		aspect_ratio = 16/16
 		winx, winy = window
 
 		self.image_width = winx
-		self.image_height = winy
+		self.image_height = winy / aspect_ratio
+		self.image_height = 1 if self.image_height < 1 else self.image_height
 
 		self.viewport_u = pygame.math.Vector3(self.image_width, 0, 0)
 		self.viewport_v = pygame.math.Vector3(0, -self.image_width, 0)
@@ -32,6 +34,11 @@ class Renderer:
 	def __init__(self, camerapos, viewport):
 		self.camerapos = camerapos
 		self.viewport = viewport
+		self.objects = []
+		self.sphere_color = colors["red"]
+
+	def add_object(self, object):
+		self.objects.append(object)
 
 	def calculate_background_color(self, ray):
 		white = colors["white"]
@@ -60,30 +67,48 @@ class Renderer:
 		tc = L.dot(ray.direction)
 
 		if tc < 0 or L_squared < tc:
-			return [-1,-1]
+			return False
 
 		perp = sqrt(L_squared - tc*tc)
 
 		if radius < perp:
-			return [-1,-1]
+			return False
+		return True
 
+		# Not necessary if we don't care about collision coordinates
+		'''
 		t1c = sqrt(radius*radius - perp*perp)
 		t1 = tc - t1c
 		t2 = tc + t1c
 
 		return [ray.get_p(t1), ray.get_p(t2)]
+		'''
 
 	def render(self, screen, coord, window):
 		i,j = coord
 
+		# Calculate the position from the current viewport coord
+		# to the origin of the casted ray
 		pixel_location = self.viewport.pixel_location
 		delta_u = self.viewport.delta_u
 		delta_v = self.viewport.delta_v
 
 		pixel_center = pixel_location + (i * delta_u) + (j * delta_v)
+
+		# Create the ray
 		ray_origin = self.camerapos
 		ray_direction = pixel_center - ray_origin
-
 		ray = Ray(ray_origin, ray_direction.normalize())
 
+		# Render spheres
+		for object in self.objects:
+			if object.type != "sphere":
+				continue
+
+			if self.sphere_calc(object, ray):
+				screen.set_at((i,j), object.color)
+				return
+
+		# Drop out of the geometry collision calculations
+		# if we didn't hit any objects of interest
 		screen.set_at((i,j), self.calculate_background_color(ray))

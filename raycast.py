@@ -5,11 +5,12 @@ from random import randrange as rr
 from threading import Thread
 
 from renderer import Renderer, Viewport
+from geometry import Sphere
 from ray import Ray
 
 done = False
 
-def render_help(screen, window):
+def render_help(screen, window, scene_geometry):
 	global done
 
 	camerapos = pygame.math.Vector3(0,0,0)
@@ -18,9 +19,14 @@ def render_help(screen, window):
 	renderer = Renderer(camerapos, vport)
 	winx,winy = window
 
+	# Add geometry to the scene
+	for item in scene_geometry:
+		renderer.add_object(item)
+
 	for i in range(winx):
 		if done:
 			return
+
 		for j in range(winy):
 			if done:
 				return
@@ -28,17 +34,20 @@ def render_help(screen, window):
 			renderer.render(screen, (i,j), window)
 		pygame.display.flip()
 
-def main(winx=600, winy=600):
+def main(winx=500, winy=500):
 	global done
 
 	pygame.display.init()
 	screen = pygame.display.set_mode((winx,winy))
 	clock = pygame.time.Clock()
 
-	render_thread = Thread(target=render_help, args=(screen, (winx,winy)))
+	scene_geometry = [Sphere(0,0,-5.001,5)]
+	thread_args = (screen, (winx,winy), scene_geometry)
+
+	render_thread = Thread(target=render_help, args=thread_args)
 	render_thread.start()
 	while not done:
-		clock.tick(60)
+		clock.tick(30)
 
 		events = pygame.event.get()
 		for e in events:
