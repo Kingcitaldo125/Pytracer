@@ -33,17 +33,21 @@ class Renderer:
 		self.camerapos = camerapos
 		self.viewport = viewport
 
-	def calculate_color(self, ray):
+	def calculate_background_color(self, ray):
 		white = colors["white"]
 		blue = colors["blue"]
 
-		y_direction = (ray.direction.y + 1.0) / 2
+		a = (ray.direction.y + 1.0) / 2
 
-		xchan = int(y_direction * 127)
-		ychan = int(y_direction * 178)
-		zchan = int(y_direction * 255)
+		xchan = 127
+		ychan = 178
+		zchan = 255
 
-		return (xchan, ychan, zchan)
+		x = (1.0-a)*255 + a*xchan
+		y = (1.0-a)*255 + a*ychan
+		z = (1.0-a)*255 + a*zchan
+
+		return (x, y, z)
 
 	def sphere_calc(self, sphere, ray):
 		# References:
@@ -82,4 +86,4 @@ class Renderer:
 
 		ray = Ray(ray_origin, ray_direction.normalize())
 
-		screen.set_at((i,j), self.calculate_color(ray))
+		screen.set_at((i,j), self.calculate_background_color(ray))

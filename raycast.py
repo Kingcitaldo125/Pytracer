@@ -24,8 +24,9 @@ def render_help(screen, window):
 		for j in range(winy):
 			if done:
 				return
-			#print(i,j,renderer.calculate_color(i,j))
+
 			renderer.render(screen, (i,j), window)
+		pygame.display.flip()
 
 def main(winx=600, winy=600):
 	global done
@@ -46,8 +47,6 @@ def main(winx=600, winy=600):
 					done = True
 					break
 
-		pygame.display.flip()
-
 	render_thread.join()
 	pygame.display.quit()
 
@@ -63,7 +62,7 @@ def scratch():
 
 	for i in range(25):
 		for j in range(25):
-			print(i,j,renderer.calculate_color(ray))
+			print(i,j,renderer.calculate_background_color(ray))
 			ray.direction.y += 0.1
 		ray.direction.y = 0
 
