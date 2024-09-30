@@ -18,8 +18,8 @@ class Viewport:
 		self.image_height = winy / aspect_ratio
 		self.image_height = 1 if self.image_height < 1 else self.image_height
 
-		self.viewport_u = pygame.math.Vector3(self.image_width, 0, 0)
-		self.viewport_v = pygame.math.Vector3(0, -self.image_width, 0)
+		self.viewport_u = pygame.math.Vector3(2, 0, 0)
+		self.viewport_v = pygame.math.Vector3(0, -2, 0)
 
 		self.delta_u = self.viewport_u / self.image_width
 		self.delta_v = self.viewport_v / self.image_height

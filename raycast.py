@@ -41,7 +41,7 @@ def main(winx=500, winy=500):
 	screen = pygame.display.set_mode((winx,winy))
 	clock = pygame.time.Clock()
 
-	scene_geometry = [Sphere(0,0,-5.001,5)]
+	scene_geometry = [Sphere(0,0,-1,0.5)]
 	thread_args = (screen, (winx,winy), scene_geometry)
 
 	render_thread = Thread(target=render_help, args=thread_args)
