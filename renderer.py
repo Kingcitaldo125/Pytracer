@@ -114,13 +114,19 @@ class Renderer:
 
 			# Calculate normal
 			res1,res2 = result
-			normalvec = None
+			nvec = None
 			if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
-				normalvec = res1
+				nvec = res1
 			else:
-				normalvec = res2
+				nvec = res2
 
-			normalvec = (normalvec - object.vector).normalize()
+			normalvec = (nvec - object.vector).normalize()
+
+			# Calculate front-face
+			front_face = True if ray.direction.dot(normalvec) < 0 else False
+			if front_face == False:
+				normalvec = normalvec * -1
+
 			screen.set_at((i,j), self.calculate_normal_color(normalvec))
 			return
 
