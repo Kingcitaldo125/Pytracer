@@ -20,7 +20,6 @@ def render_help(screen, window, scene_geometry):
 	winx,winy = window
 
 	do_alaising = False
-	do_alaising = True
 
 	# Add geometry to the scene
 	for item in scene_geometry:
@@ -48,7 +47,7 @@ def render_help(screen, window, scene_geometry):
 				if done:
 					return
 
-				renderer.aliase(screen, window, (i,j), 4)
+				renderer.aliase(screen, window, (i,j), 2)
 			pygame.display.flip()
 
 	print("Done.")
@@ -66,18 +65,27 @@ def main(winx=500, winy=500):
 
 	render_thread = Thread(target=render_help, args=thread_args)
 	render_thread.start()
+	repeat = False
 	while not done:
 		clock.tick(30)
 
 		events = pygame.event.get()
 		for e in events:
 			if e.type == pygame.KEYDOWN:
+				if e.key == pygame.K_SPACE:
+					repeat = True
+					done = True
+					break
 				if e.key == pygame.K_ESCAPE:
 					done = True
 					break
 
 	render_thread.join()
 	pygame.display.quit()
+
+	if repeat:
+		done = False
+		main(winx,winy)
 
 def scratch():
 	camerapos = pygame.math.Vector3(0,0,0)

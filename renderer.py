@@ -3,7 +3,7 @@ import pygame
 from math import sqrt
 
 from ray import Ray
-from utility import colors
+from utility import colors, random_hemisphere
 
 # References:
 # https://raytracing.github.io/books/RayTracingInOneWeekend.html
@@ -40,30 +40,7 @@ class Renderer:
 	def add_object(self, object):
 		self.objects.append(object)
 
-	def calculate_normal_color(self, vec):
-		xval = abs(255 * vec.x)
-		yval = abs(255 * vec.y)
-		zval = abs(255 * vec.z)
-
-		return (int(xval), int(yval), int(zval))
-
-	def calculate_background_color(self, ray):
-		white = colors["white"]
-		blue = colors["blue"]
-
-		a = (ray.direction.y + 1.0) / 2
-
-		xchan = 127
-		ychan = 178
-		zchan = 255
-
-		x = (1.0-a)*255 + a*xchan
-		y = (1.0-a)*255 + a*ychan
-		z = (1.0-a)*255 + a*zchan
-
-		return (x, y, z)
-
-	def sphere_calc(self, sphere, ray):
+	def sphere_calc(self, ray, sphere):
 		# References:
 		# https://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html
 		# https://youtu.be/HFPlKQGChpE?si=YXX-EGaqQijDr4oE
@@ -116,7 +93,57 @@ class Renderer:
 		for i in range(cycles):
 			self.aliase_help(screen, window, coord)
 
-	def render(self, screen, window, coord):
+	def calculate_normal(self, ray, result):
+		res1,res2 = result
+
+		if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
+			return res1
+		return res2
+
+	def calculate_surf_color(self, ray, object, vec):
+		if ray.hit_limit():
+			return (0,0,0)
+
+		result = self.sphere_calc(ray, object)
+
+		if result is None:
+			direction = ray.direction
+			dy = direction.y
+			if dy < 0:
+				dy = 0
+			cvec = dy * pygame.math.Vector3(255,255,255)
+			return (cvec.x, cvec.y, cvec.z)
+
+		normal = self.calculate_normal(ray, result)
+		normalvec = (normal - object.vector).normalize()
+		random_dir = random_hemisphere(vec)
+
+		ray = Ray(normal, random_dir, ray.bounces + 1)
+		scol = self.calculate_surf_color(ray, object, normalvec)
+
+		x = scol[0] * 0.5
+		y = scol[1] * 0.5
+		z = scol[2] * 0.5
+
+		return (x,y,z)
+
+	def calculate_background_color(self, ray):
+		white = colors["white"]
+		blue = colors["blue"]
+
+		a = (ray.direction.y + 1.0) / 2
+
+		xchan = 127
+		ychan = 178
+		zchan = 255
+
+		x = (1.0-a)*255 + a*xchan
+		y = (1.0-a)*255 + a*ychan
+		z = (1.0-a)*255 + a*zchan
+
+		return (x, y, z)
+
+	def render(self, screen, window, coord, debug=False):
 		i,j = coord
 
 		# Calculate the position from the current viewport coord
@@ -130,33 +157,27 @@ class Renderer:
 		# Create the ray
 		ray_origin = self.camerapos
 		ray_direction = pixel_center - ray_origin
-		ray = Ray(ray_origin, ray_direction.normalize())
+		ray = Ray(ray_origin, ray_direction.normalize(), 0)
 
 		# Render spheres
 		for object in self.objects:
 			if object.type != "sphere":
 				continue
 
-			result = self.sphere_calc(object, ray)
+			result = self.sphere_calc(ray, object)
 			if result is None:
 				continue
 
-			# Calculate normal
-			res1,res2 = result
-			nvec = None
-			if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
-				nvec = res1
-			else:
-				nvec = res2
-
+			nvec = self.calculate_normal(ray, result)
 			normalvec = (nvec - object.vector).normalize()
 
-			# Calculate front-face
-			front_face = True if ray.direction.dot(normalvec) < 0 else False
-			if front_face == False:
-				normalvec = normalvec * -1
+			if debug:
+				screen.set_at((i,j), (255,255,255))
+				return
 
-			screen.set_at((i,j), self.calculate_normal_color(normalvec))
+			surf_col = self.calculate_surf_color(ray, object, normalvec)
+			#print(f"surf_col {surf_col}")
+			screen.set_at((i,j), surf_col)
 			return
 
 		# Drop out of the geometry collision calculations
