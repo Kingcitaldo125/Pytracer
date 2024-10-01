@@ -40,6 +40,13 @@ class Renderer:
 	def add_object(self, object):
 		self.objects.append(object)
 
+	def calculate_normal_color(self, vec):
+		xval = abs(255 * vec.x)
+		yval = abs(255 * vec.y)
+		zval = abs(255 * vec.z)
+
+		return (int(xval), int(yval), int(zval))
+
 	def calculate_background_color(self, ray):
 		white = colors["white"]
 		blue = colors["blue"]
@@ -67,22 +74,18 @@ class Renderer:
 		tc = L.dot(ray.direction)
 
 		if tc < 0 or L_squared < tc:
-			return False
+			return None
 
 		perp = sqrt(L_squared - tc*tc)
 
 		if radius < perp:
-			return False
-		return True
+			return None
 
-		# Not necessary if we don't care about collision coordinates
-		'''
 		t1c = sqrt(radius*radius - perp*perp)
 		t1 = tc - t1c
 		t2 = tc + t1c
 
 		return [ray.get_p(t1), ray.get_p(t2)]
-		'''
 
 	def render(self, screen, coord, window):
 		i,j = coord
@@ -105,9 +108,21 @@ class Renderer:
 			if object.type != "sphere":
 				continue
 
-			if self.sphere_calc(object, ray):
-				screen.set_at((i,j), object.color)
-				return
+			result = self.sphere_calc(object, ray)
+			if result is None:
+				continue
+
+			# Calculate normal
+			res1,res2 = result
+			normalvec = None
+			if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
+				normalvec = res1
+			else:
+				normalvec = res2
+
+			normalvec = (normalvec - object.vector).normalize()
+			screen.set_at((i,j), self.calculate_normal_color(normalvec))
+			return
 
 		# Drop out of the geometry collision calculations
 		# if we didn't hit any objects of interest

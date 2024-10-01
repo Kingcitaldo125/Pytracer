@@ -68,12 +68,18 @@ def scratch():
 	ray_direction = pygame.math.Vector3(0,0,1) - ray_origin
 
 	ray = Ray(ray_origin, ray_direction.normalize())
-
+	
 	for i in range(25):
 		for j in range(25):
-			print(i,j,renderer.calculate_background_color(ray))
-			ray.direction.y += 0.1
-		ray.direction.y = 0
+			ray.direction = pygame.math.Vector3(i,0,j) - ray.origin
+			nc = None
+			if ray.direction.length() != 0:
+				ray.direction.normalize_ip()
+				nc = renderer.calculate_normal_color(ray.direction)
+			else:
+				nc = (0,0,0)
+			print(f"normal color: {nc}")
 
 if __name__ == "__main__":
 	main()
+	#scratch()
