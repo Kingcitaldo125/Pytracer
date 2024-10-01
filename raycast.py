@@ -19,10 +19,14 @@ def render_help(screen, window, scene_geometry):
 	renderer = Renderer(camerapos, vport)
 	winx,winy = window
 
+	do_alaising = False
+	do_alaising = True
+
 	# Add geometry to the scene
 	for item in scene_geometry:
 		renderer.add_object(item)
 
+	print("Rendering...")
 	for i in range(winx):
 		if done:
 			return
@@ -31,8 +35,23 @@ def render_help(screen, window, scene_geometry):
 			if done:
 				return
 
-			renderer.render(screen, (i,j), window)
+			renderer.render(screen, window, (i,j))
 		pygame.display.flip()
+
+	if do_alaising:
+		print("Ailasing...")
+		for i in range(winx):
+			if done:
+				return
+
+			for j in range(winy):
+				if done:
+					return
+
+				renderer.aliase(screen, window, (i,j), 4)
+			pygame.display.flip()
+
+	print("Done.")
 
 def main(winx=500, winy=500):
 	global done

@@ -87,7 +87,36 @@ class Renderer:
 
 		return [ray.get_p(t1), ray.get_p(t2)]
 
-	def render(self, screen, coord, window):
+	def aliase_help(self, screen, window, coord):
+		color_vals = []
+		winx,winy = window
+		pixel_x,pixel_y = coord
+
+		for j in range(pixel_y - 1, pixel_y + 2):
+			for i in range(pixel_x - 1, pixel_x + 2):
+				if i < 0 or i >= winx or j < 0 or j >= winy:
+					continue
+				color_vals.append(screen.get_at((i,j))[:-1])
+
+		sumr = 0
+		sumg = 0
+		sumb = 0
+		for i in color_vals:
+			r,g,b = i
+			sumr += r
+			sumg += g
+			sumb += b
+
+		n_items = len(color_vals)
+		n_colors = (sumr//n_items, sumg//n_items, sumb//n_items)
+
+		return screen.set_at((pixel_x, pixel_y), n_colors)
+
+	def aliase(self, screen, window, coord, cycles=1):
+		for i in range(cycles):
+			self.aliase_help(screen, window, coord)
+
+	def render(self, screen, window, coord):
 		i,j = coord
 
 		# Calculate the position from the current viewport coord
