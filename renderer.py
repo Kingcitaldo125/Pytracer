@@ -36,6 +36,7 @@ class Renderer:
 		self.sphere_color = colors["red"]
 		self.zero_color_vector = pygame.math.Vector3(0,0,0)
 		self.base_color_vector = pygame.math.Vector3(255,255,255)
+		self.samples_per_pixel = 10
 
 	def add_object(self, object):
 		self.objects.append(object)
@@ -116,7 +117,17 @@ class Renderer:
 
 			return cvec
 
-	def render(self, screen, window, coord, debug=False):
+	def hit_anything(self, ray):
+		for object in self.objects:
+			result = object.hit(ray)
+
+			if result is None:
+				continue
+
+			return True
+		return False
+
+	def render(self, screen, window, coord):
 		i,j = coord
 
 		# Calculate the position from the current viewport coord
@@ -132,30 +143,21 @@ class Renderer:
 		ray_direction = pixel_center - ray_origin
 		ray = Ray(ray_origin, ray_direction.normalize(), 0)
 
-		# Render objects
-		hit_anything = False
-		pixel_color = pygame.math.Vector3(0,0,0)
-		for object in self.objects:
-			result = object.hit(ray)
-
-			if result is None:
-				continue
-
-			hit_anything = True
-			nvec = calculate_normal(ray, result)
-			normalvec = (nvec - object.vector).normalize()
-
-			if debug:
-				screen.set_at((i,j), (255,255,255))
-				return
-
-			surf_col = self.calculate_surf_color(ray, normalvec)
-			pixel_color = pixel_color + surf_col
-			break
-
 		# Drop out of the geometry collision calculations
 		# if we didn't hit any objects of interest
-		if not hit_anything:
+		if not self.hit_anything(ray):
 			screen.set_at((i,j), self.calculate_background_color(ray))
-		else:
-			screen.set_at((i,j), surf_col)
+			return
+
+		# Render objects
+		ray = Ray(ray_origin, ray_direction.normalize(), 0)
+		pixel_color = pygame.math.Vector3(0,0,0)
+		for sample in range(self.samples_per_pixel):
+			surf_col = self.calculate_surf_color(ray, ray.direction)
+			pixel_color = pixel_color + surf_col
+
+		fx = pixel_color.x // self.samples_per_pixel
+		fy = pixel_color.y // self.samples_per_pixel
+		fz = pixel_color.z // self.samples_per_pixel
+
+		screen.set_at((i,j), (fx, fy, fz))

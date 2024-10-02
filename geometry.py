@@ -13,6 +13,7 @@ class Object:
 		self.z = z
 		self.vector = pygame.math.Vector3(self.x, self.y, self.z)
 		self.type = "unknown"
+		self.item_id = -1
 
 	def hit(self, ray, interval=0.001):
 		return False
@@ -25,18 +26,25 @@ class Sphere(Object):
 		self.color = colors["red"]
 		self.type = "sphere"
 
+	def __str__(self):
+		return str(self.item_id) + ":" + str(self.x) + "," + str(self.y) + "," + str(self.z)
+
+	def set_id(self,nid):
+		self.item_id = nid
+
 	def hit(self, ray, interval=0.001):
 		# References:
 		# https://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html
 		# https://youtu.be/HFPlKQGChpE?si=YXX-EGaqQijDr4oE
 
 		L = self.vector - ray.origin
-		L_squared = L*L
+		L_len = L.length()
 		tc = L.dot(ray.direction)
 
-		if tc < interval or L_squared < tc:
+		if tc < interval or L_len < tc:
 			return None
 
+		L_squared = L.length_squared()
 		perp = sqrt(L_squared - tc*tc)
 
 		if self.radius < perp:
