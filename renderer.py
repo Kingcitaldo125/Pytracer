@@ -114,9 +114,10 @@ class Renderer:
 			cvec = dy * pygame.math.Vector3(255,255,255)
 			return (cvec.x, cvec.y, cvec.z)
 
+		# Calculate reflection vector direction
 		normal = self.calculate_normal(ray, result)
 		normalvec = (normal - object.vector).normalize()
-		random_dir = random_hemisphere(vec)
+		random_dir = normalvec + random_hemisphere(vec)
 
 		ray = Ray(normal, random_dir, ray.bounces + 1)
 		scol = self.calculate_surf_color(ray, object, normalvec)
