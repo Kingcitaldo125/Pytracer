@@ -10,6 +10,13 @@ colors = {
 	"black": (0,0,0)
 }
 
+def calculate_normal(ray, result):
+	res1,res2 = result
+
+	if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
+		return res1
+	return res2
+
 def random_color():
 	return (rr(0,255), rr(0,255), rr(0,255))
 
