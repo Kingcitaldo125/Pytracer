@@ -34,6 +34,7 @@ class Renderer:
 		self.viewport = viewport
 		self.objects = []
 		self.sphere_color = colors["red"]
+		self.zero_color_vector = pygame.math.Vector3(0,0,0)
 		self.base_color_vector = pygame.math.Vector3(255,255,255)
 
 	def add_object(self, object):
@@ -86,7 +87,7 @@ class Renderer:
 
 	def calculate_surf_color(self, ray, vec):
 		if ray.hit_limit():
-			return (0,0,0)
+			return self.zero_color_vector
 
 		for obj in self.objects:
 			result = obj.hit(ray)
@@ -95,9 +96,7 @@ class Renderer:
 				direction = ray.direction.normalize()
 				a = 0.5 * (direction.y + 1.0)
 				sa = a * 255
-				cvec = pygame.math.Vector3(sa,sa,sa)
-
-				return (cvec.x, cvec.y, cvec.z)
+				return pygame.math.Vector3(sa,sa,sa)
 
 			# Calculate reflection vector direction
 			normal = calculate_normal(ray, result)
@@ -113,13 +112,9 @@ class Renderer:
 			ray = Ray(normal, random_dir, ray.bounces + 1)
 			scol = self.calculate_surf_color(ray, normalvec)
 
-			x = scol[0] * 0.5
-			y = scol[1] * 0.5
-			z = scol[2] * 0.5
+			cvec = pygame.math.Vector3(scol[0] * 0.5, scol[1] * 0.5, scol[2] * 0.5)
 
-			return (x,y,z)
-
-		#return (0,0,0)
+			return cvec
 
 	def render(self, screen, window, coord, debug=False):
 		i,j = coord
@@ -138,12 +133,15 @@ class Renderer:
 		ray = Ray(ray_origin, ray_direction.normalize(), 0)
 
 		# Render objects
+		hit_anything = False
+		pixel_color = pygame.math.Vector3(0,0,0)
 		for object in self.objects:
 			result = object.hit(ray)
 
 			if result is None:
 				continue
 
+			hit_anything = True
 			nvec = calculate_normal(ray, result)
 			normalvec = (nvec - object.vector).normalize()
 
@@ -152,10 +150,12 @@ class Renderer:
 				return
 
 			surf_col = self.calculate_surf_color(ray, normalvec)
-			#print(f"surf_col {surf_col}")
-			screen.set_at((i,j), surf_col)
-			return
+			pixel_color = pixel_color + surf_col
+			break
 
 		# Drop out of the geometry collision calculations
 		# if we didn't hit any objects of interest
-		screen.set_at((i,j), self.calculate_background_color(ray))
+		if not hit_anything:
+			screen.set_at((i,j), self.calculate_background_color(ray))
+		else:
+			screen.set_at((i,j), surf_col)
