@@ -1,7 +1,7 @@
 import pygame
 
 from ray import Ray
-from utility import calculate_normal, colors
+from utility import calculate_normal, colors, random_hemisphere
 
 # References:
 # https://raytracing.github.io/books/RayTracingInOneWeekend.html
@@ -34,6 +34,7 @@ class Renderer:
 		self.viewport = viewport
 		self.objects = []
 		self.sphere_color = colors["red"]
+		self.base_color_vector = pygame.math.Vector3(255,255,255)
 
 	def add_object(self, object):
 		self.objects.append(object)
@@ -83,6 +84,43 @@ class Renderer:
 
 		return (x, y, z)
 
+	def calculate_surf_color(self, ray, vec):
+		if ray.hit_limit():
+			return (0,0,0)
+
+		for obj in self.objects:
+			result = obj.hit(ray)
+
+			if result is None:
+				direction = ray.direction.normalize()
+				a = 0.5 * (direction.y + 1.0)
+				sa = a * 255
+				cvec = pygame.math.Vector3(sa,sa,sa)
+
+				return (cvec.x, cvec.y, cvec.z)
+
+			# Calculate reflection vector direction
+			normal = calculate_normal(ray, result)
+			normalvec = (normal - obj.vector).normalize()
+
+			# Determine if we hit a front-face
+			fface = ray.direction.dot(normalvec) < 0
+			normalvec = normalvec if fface else normalvec * -1
+
+			# Calculate the reflection direction based on faces/scatter direction
+			random_dir = normalvec + random_hemisphere(vec)
+
+			ray = Ray(normal, random_dir, ray.bounces + 1)
+			scol = self.calculate_surf_color(ray, normalvec)
+
+			x = scol[0] * 0.5
+			y = scol[1] * 0.5
+			z = scol[2] * 0.5
+
+			return (x,y,z)
+
+		#return (0,0,0)
+
 	def render(self, screen, window, coord, debug=False):
 		i,j = coord
 
@@ -113,7 +151,7 @@ class Renderer:
 				screen.set_at((i,j), (255,255,255))
 				return
 
-			surf_col = object.calculate_surf_color(ray, normalvec)
+			surf_col = self.calculate_surf_color(ray, normalvec)
 			#print(f"surf_col {surf_col}")
 			screen.set_at((i,j), surf_col)
 			return

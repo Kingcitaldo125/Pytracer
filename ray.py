@@ -1,4 +1,5 @@
-import pygame
+from pygame.math import Vector3
+
 
 class Ray:
 	def __init__(self, origin, direction, bounces, bounce_limit=10):
@@ -15,4 +16,4 @@ class Ray:
 		ypart = self.origin.y + self.direction.y * t
 		zpart = self.origin.z + self.direction.z * t
 
-		return pygame.math.Vector3(xpart, ypart, zpart)
+		return Vector3(xpart, ypart, zpart)
