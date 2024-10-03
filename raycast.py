@@ -2,6 +2,7 @@ import pygame
 
 from math import sqrt
 from random import randrange as rr
+from time import time
 from threading import Thread
 
 import material
@@ -28,6 +29,7 @@ def render_help(screen, window, scene_geometry):
 	for item in scene_geometry:
 		renderer.add_object(item)
 
+	start = time()
 	print("Rendering...")
 	for i in range(winx):
 		if done:
@@ -53,7 +55,9 @@ def render_help(screen, window, scene_geometry):
 				renderer.aliase(screen, window, (i,j), 2)
 			pygame.display.flip()
 
-	print("Done.")
+	end = time()
+	elapsed = int(end - start)
+	print(f"Took '{elapsed}' seconds to render.")
 
 def main(winx=500, winy=500):
 	global done
@@ -78,9 +82,6 @@ def main(winx=500, winy=500):
 
 	scene_geometry.extend([s1,s2,s3,s4])
 	#'''
-
-	#scene_geometry.append(s1)
-	#scene_geometry.append(s2)
 
 	for id,item in enumerate(scene_geometry):
 		item.set_id(id + 1)

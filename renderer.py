@@ -95,9 +95,9 @@ class Renderer:
 		white = colors["white"]
 		blue = colors["blue"]
 
-		ray.direction.normalize_ip()
+		ray_hat = ray.direction.normalize()
 
-		a = (ray.direction.y + 1.0) / 2
+		a = (ray_hat.y + 1.0) / 2
 
 		xchan = 0.5
 		ychan = 0.7

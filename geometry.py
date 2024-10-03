@@ -37,6 +37,7 @@ class Sphere(Object):
 		# References:
 		# https://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html
 		# https://youtu.be/HFPlKQGChpE?si=YXX-EGaqQijDr4oE
+		# https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
 		L = self.position - ray.origin
 		L_len = L.length()
