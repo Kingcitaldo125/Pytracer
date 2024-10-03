@@ -64,6 +64,7 @@ def main(winx=500, winy=500):
 
 	scene_geometry = []
 
+	#'''
 	# Materials
 	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
 	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
@@ -72,12 +73,14 @@ def main(winx=500, winy=500):
 
 	s1 = Sphere(0.0,-100.5,-1.0,100,ground_metal)
 	s2 = Sphere(0.0,0.0,-1.2,0.5,center_metal)
-	#s3 = Sphere(-1.0,0.0,-1.0,0.5,left_metal)
-	#s4 = Sphere(1.0,0.0,-1.0,0.5,right_metal)
+	s3 = Sphere(-1.0,0.0,-1.0,0.5,left_metal)
+	s4 = Sphere(1.0,0.0,-1.0,0.5,right_metal)
 
-	#scene_geometry.extend([s1,s2,s3,s4])
-	scene_geometry.append(s1)
-	scene_geometry.append(s2)
+	scene_geometry.extend([s1,s2,s3,s4])
+	#'''
+
+	#scene_geometry.append(s1)
+	#scene_geometry.append(s2)
 
 	for id,item in enumerate(scene_geometry):
 		item.set_id(id + 1)

@@ -41,6 +41,9 @@ class HitRecord:
 		self.p = None
 		self.t = None
 
+	def __str__(self):
+		return "p: " + str(self.p) + " t: " + str(self.t)
+
 	def set_face_normal(self, ray, outward_normal):
 		self.front_face = ray.direction.dot(outward_normal) < 0
 		self.normal = outward_normal if self.front_face else outward_normal * -1
@@ -92,6 +95,8 @@ class Renderer:
 		white = colors["white"]
 		blue = colors["blue"]
 
+		ray.direction.normalize_ip()
+
 		a = (ray.direction.y + 1.0) / 2
 
 		xchan = 0.5
@@ -104,9 +109,10 @@ class Renderer:
 
 		return pygame.math.Vector3(x, y, z)
 
-	def calculate_surf_color(self, ray, interval):
+	def calculate_surf_color(self, ray, interval, debug=False):
 		if ray.hit_limit():
-			print('hit limit')
+			if debug:
+				print('hit limit')
 			return self.zero_color_vector
 
 		record = HitRecord()
@@ -129,16 +135,18 @@ class Renderer:
 		# Calculate surface color based on the object's material
 		scattered,attenuation = base_material.scatter(ray, record)
 
-		#print(f"attenuation {attenuation}")
-
 		scol = self.calculate_surf_color(scattered, interval)
 
-		#print(f"scol {scol}")
 		rx = round(attenuation.x * scol.x, 1)
 		ry = round(attenuation.y * scol.y, 1)
 		rz = round(attenuation.z * scol.z, 1)
 		retcol = pygame.math.Vector3(rx,ry,rz)
-		#print(f"retcol {retcol}")
+
+		if debug:
+			print(f"attenuation {attenuation}")
+			print(f"scol {scol}")
+			print(f"retcol {retcol}")
+			print('')
 
 		return retcol
 
@@ -196,5 +204,9 @@ class Renderer:
 		fx = pixel_color.x // self.samples_per_pixel
 		fy = pixel_color.y // self.samples_per_pixel
 		fz = pixel_color.z // self.samples_per_pixel
+
+		#print("fx", fx)
+		#print("fy", fy)
+		#print("fz", fz)
 
 		screen.set_at((i,j), (fx, fy, fz))

@@ -36,5 +36,4 @@ class Metal(Material):
 	def scatter(self, ray_in, record):
 		ref_v = reflect(ray_in.direction, record.normal)
 
-		return [Ray(result, ref_v, ray_in.bounces + 1), self.albedo]
- 
+		return [Ray(record.p, ref_v, ray_in.bounces + 1), self.albedo]
