@@ -54,8 +54,8 @@ class Renderer:
 		self.viewport = viewport
 		self.objects = []
 		self.sphere_color = colors["red"]
-		self.zero_color_vector = pygame.math.Vector3(0,0,0)
-		self.base_color_vector = pygame.math.Vector3(255,255,255)
+		self.zero_color_vector = pygame.math.Vector3(0.0,0.0,0.0)
+		self.base_color_vector = pygame.math.Vector3(1.0,1.0,1.0)
 		self.samples_per_pixel = 10
 		self.ray_interval = Interval(0.001,inf)
 
@@ -133,7 +133,7 @@ class Renderer:
 			return self.calculate_background_color(ray)
 
 		# Calculate surface color based on the object's material
-		scattered,attenuation = base_material.scatter(ray, record)
+		scattered,attenuation = base_material.scatter(ray, record, True)
 
 		scol = self.calculate_surf_color(scattered, interval)
 

@@ -16,6 +16,15 @@ def random_color():
 def random_vec3():
 	return pygame.math.Vector3(uniform(-1,1), uniform(-1,1), uniform(-1,1))
 
+def random_vec_sphere(spherevec, radius):
+	rvec = pygame.math.Vector3(spherevec.x,spherevec.y,spherevec.z)
+
+	rvec.x += uniform(-radius,radius)
+	rvec.y += uniform(-radius,radius)
+	rvec.z += uniform(-radius,radius)
+
+	return rvec
+
 def random_vec3_clamp(min, max):
 	xval = max + 1
 	yval = max + 1
