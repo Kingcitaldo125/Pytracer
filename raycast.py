@@ -4,6 +4,8 @@ from math import sqrt
 from random import randrange as rr
 from threading import Thread
 
+import material
+
 from renderer import Renderer, Viewport
 from geometry import Sphere
 from ray import Ray
@@ -15,6 +17,7 @@ def render_help(screen, window, scene_geometry):
 
 	camerapos = pygame.math.Vector3(0,0,0)
 
+	# Needs moved to a camera class
 	vport = Viewport(camerapos, window)
 	renderer = Renderer(camerapos, vport)
 	winx,winy = window
@@ -59,8 +62,22 @@ def main(winx=500, winy=500):
 	screen = pygame.display.set_mode((winx,winy))
 	clock = pygame.time.Clock()
 
-	# Base sphere, ground sphere
-	scene_geometry = [Sphere(0,0,-1,0.5), Sphere(0,-100.5,-1,100)]
+	scene_geometry = []
+
+	# Materials
+	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
+	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
+	left_metal = material.Metal(pygame.math.Vector3(0.8,0.8,0.8))
+	right_metal = material.Metal(pygame.math.Vector3(0.8,0.6,0.2))
+
+	s1 = Sphere(0.0,-100.5,-1.0,100,ground_metal)
+	s2 = Sphere(0.0,0.0,-1.2,0.5,center_metal)
+	#s3 = Sphere(-1.0,0.0,-1.0,0.5,left_metal)
+	#s4 = Sphere(1.0,0.0,-1.0,0.5,right_metal)
+
+	#scene_geometry.extend([s1,s2,s3,s4])
+	scene_geometry.append(s1)
+	scene_geometry.append(s2)
 
 	for id,item in enumerate(scene_geometry):
 		item.set_id(id + 1)

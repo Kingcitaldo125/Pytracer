@@ -6,13 +6,13 @@ class Interval:
 		self.max = max
 
 	def size(self):
-		return max - min
+		return self.max - self.min
 
 	def contains(self, x):
-		return min <= x and x <= max
+		return self.min <= x and x <= self.max
 
 	def surrounds(self, x):
-		return min < x and x < max
+		return self.min < x and x < self.max
 
 empty = Interval(math.inf, math.inf * -1)
 universe = Interval(-1 * math.inf, math.inf)

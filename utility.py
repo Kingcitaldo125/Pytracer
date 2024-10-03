@@ -10,13 +10,6 @@ colors = {
 	"black": (0,0,0)
 }
 
-def calculate_normal(ray, result):
-	res1,res2 = result
-
-	if ray.origin.distance_to(res1) < ray.origin.distance_to(res2):
-		return res1
-	return res2
-
 def random_color():
 	return (rr(0,255), rr(0,255), rr(0,255))
 
@@ -43,3 +36,13 @@ def random_hemisphere(normalvec):
 	vec = random_vec3_clamp(-1,1)
 	vec.scale_to_length(1.0)
 	return vec if vec.dot(normalvec) > 0.0 else vec * -1
+
+def near_zero(vec, scale=1e-8):
+	vx = abs(vec.x)
+	vy = abs(vec.y)
+	vz = abs(vec.z)
+
+	return vx < scale and vy < scale and vz < scale
+
+def reflect(vec,normal):
+	return vec - 2 * vec.dot(normal) * normal

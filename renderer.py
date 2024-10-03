@@ -1,7 +1,12 @@
 import pygame
 
+from math import inf
+
+import material
+
 from ray import Ray
-from utility import calculate_normal, colors, random_hemisphere
+from interval import Interval
+from utility import colors, random_hemisphere
 
 # References:
 # https://raytracing.github.io/books/RayTracingInOneWeekend.html
@@ -28,6 +33,18 @@ class Viewport:
 
 		self.pixel_location = upper_left + 0.5 * (self.delta_u + self.delta_v)
 
+class HitRecord:
+	def __init__(self):
+		self.front_face = False
+		self.normal = pygame.math.Vector3(0,0,0)
+		self.material = material.Material()
+		self.p = None
+		self.t = None
+
+	def set_face_normal(self, ray, outward_normal):
+		self.front_face = ray.direction.dot(outward_normal) < 0
+		self.normal = outward_normal if self.front_face else outward_normal * -1
+
 class Renderer:
 	def __init__(self, camerapos, viewport):
 		self.camerapos = camerapos
@@ -37,6 +54,7 @@ class Renderer:
 		self.zero_color_vector = pygame.math.Vector3(0,0,0)
 		self.base_color_vector = pygame.math.Vector3(255,255,255)
 		self.samples_per_pixel = 10
+		self.ray_interval = Interval(0.001,inf)
 
 	def add_object(self, object):
 		self.objects.append(object)
@@ -76,55 +94,61 @@ class Renderer:
 
 		a = (ray.direction.y + 1.0) / 2
 
-		xchan = 127
-		ychan = 178
-		zchan = 255
+		xchan = 0.5
+		ychan = 0.7
+		zchan = 1.0
 
-		x = (1.0-a)*255 + a*xchan
-		y = (1.0-a)*255 + a*ychan
-		z = (1.0-a)*255 + a*zchan
+		x = (1.0-a) + a*xchan
+		y = (1.0-a) + a*ychan
+		z = (1.0-a) + a*zchan
 
-		return (x, y, z)
+		return pygame.math.Vector3(x, y, z)
 
-	def calculate_surf_color(self, ray, vec):
+	def calculate_surf_color(self, ray, interval):
 		if ray.hit_limit():
+			print('hit limit')
 			return self.zero_color_vector
 
+		record = HitRecord()
+		closest = interval.max
+		base_material = material.Material()
+		hit_something = False
 		for obj in self.objects:
-			result = obj.hit(ray)
+			ninterval = Interval(interval.min, closest)
 
-			if result is None:
-				direction = ray.direction.normalize()
-				a = 0.5 * (direction.y + 1.0)
-				sa = a * 255
-				return pygame.math.Vector3(sa,sa,sa)
+			if obj.hit(ray, ninterval, record) == False:
+				continue
 
-			# Calculate reflection vector direction
-			normal = calculate_normal(ray, result)
-			normalvec = (normal - obj.vector).normalize()
+			hit_something = True
+			closest = min(closest, record.t)
+			base_material = obj.material
 
-			# Determine if we hit a front-face
-			fface = ray.direction.dot(normalvec) < 0
-			normalvec = normalvec if fface else normalvec * -1
+		if not hit_something:
+			return self.calculate_background_color(ray)
 
-			# Calculate the reflection direction based on faces/scatter direction
-			random_dir = normalvec + random_hemisphere(vec)
+		# Calculate surface color based on the object's material
+		scattered,attenuation = base_material.scatter(ray, record)
 
-			ray = Ray(normal, random_dir, ray.bounces + 1)
-			scol = self.calculate_surf_color(ray, normalvec)
+		#print(f"attenuation {attenuation}")
 
-			cvec = pygame.math.Vector3(scol[0] * 0.5, scol[1] * 0.5, scol[2] * 0.5)
+		scol = self.calculate_surf_color(scattered, interval)
 
-			return cvec
+		#print(f"scol {scol}")
+		rx = round(attenuation.x * scol.x, 1)
+		ry = round(attenuation.y * scol.y, 1)
+		rz = round(attenuation.z * scol.z, 1)
+		retcol = pygame.math.Vector3(rx,ry,rz)
+		#print(f"retcol {retcol}")
+
+		return retcol
 
 	def hit_anything(self, ray):
 		for object in self.objects:
-			result = object.hit(ray)
+			result = object.hit(ray, self.ray_interval, HitRecord())
 
-			if result is None:
-				continue
+			if result:
+				return True
 
-			return True
 		return False
 
 	def render(self, screen, window, coord):
@@ -145,16 +169,29 @@ class Renderer:
 
 		# Drop out of the geometry collision calculations
 		# if we didn't hit any objects of interest
-		if not self.hit_anything(ray):
-			screen.set_at((i,j), self.calculate_background_color(ray))
+		if self.hit_anything(ray) == False:
+			bcol = self.calculate_background_color(ray)
+
+			bc_x = bcol.x * 255
+			bc_y = bcol.y * 255
+			bc_z = bcol.z * 255
+
+			screen.set_at((i,j), (bc_x, bc_y, bc_z))
 			return
 
 		# Render objects
 		ray = Ray(ray_origin, ray_direction.normalize(), 0)
 		pixel_color = pygame.math.Vector3(0,0,0)
 		for sample in range(self.samples_per_pixel):
-			surf_col = self.calculate_surf_color(ray, ray.direction)
-			pixel_color = pixel_color + surf_col
+			surf_col = self.calculate_surf_color(ray, self.ray_interval)
+			surf_col = surf_col * 255
+
+			surf_col.x = int(surf_col.x)
+			surf_col.y = int(surf_col.y)
+			surf_col.z = int(surf_col.z)
+
+			#print(f"surf_col {surf_col}")
+			pixel_color += surf_col
 
 		fx = pixel_color.x // self.samples_per_pixel
 		fy = pixel_color.y // self.samples_per_pixel
