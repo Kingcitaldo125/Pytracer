@@ -1,27 +1,24 @@
 import pygame
+import math
 
-from math import sqrt
 from random import randrange as rr
 from time import time
 from threading import Thread
 
 import material
 
-from renderer import Renderer, Viewport
+from renderer import Renderer
 from geometry import Sphere
-from ray import Ray
+from camera import Camera
 
 done = False
 
 def render_help(screen, window, scene_geometry):
 	global done
 
-	camerapos = pygame.math.Vector3(0,0,0)
-
-	# Needs moved to a camera class
-	vport = Viewport(camerapos, window)
-	renderer = Renderer(camerapos, vport)
 	winx,winy = window
+	cam = Camera(pygame.math.Vector3(0,0,0), window)
+	renderer = Renderer(cam)
 
 	do_alaising = False
 
@@ -68,7 +65,7 @@ def main(winx=500, winy=500):
 
 	scene_geometry = []
 
-	#'''
+	'''
 	# Materials
 	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
 	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
@@ -83,7 +80,14 @@ def main(winx=500, winy=500):
 	s5 = Sphere(-1.0, 0.0, -1.0, 0.4, bubble)
 
 	scene_geometry.extend([s1,s2,s3,s4,s5])
-	#'''
+	'''
+
+	red = material.Lambertian(pygame.math.Vector3(1.0,0.0,0.0))
+	blue = material.Lambertian(pygame.math.Vector3(0.0,0.0,1.0))
+	R = math.cos(math.pi/4)
+	s1 = Sphere(-R, 0.0, -1.0, R, blue)
+	s2 = Sphere(R, 0.0, -1.0, R, red)
+	scene_geometry.extend([s1,s2])
 
 	for id,item in enumerate(scene_geometry):
 		item.set_id(id + 1)
@@ -114,27 +118,6 @@ def main(winx=500, winy=500):
 	if repeat:
 		done = False
 		main(winx,winy)
-
-def scratch():
-	camerapos = pygame.math.Vector3(0,0,0)
-	vport = Viewport(camerapos, (600,600))
-	renderer = Renderer(camerapos, vport)
-
-	ray_origin = camerapos
-	ray_direction = pygame.math.Vector3(0,0,1) - ray_origin
-
-	ray = Ray(ray_origin, ray_direction.normalize())
-	
-	for i in range(25):
-		for j in range(25):
-			ray.direction = pygame.math.Vector3(i,0,j) - ray.origin
-			nc = None
-			if ray.direction.length() != 0:
-				ray.direction.normalize_ip()
-				nc = renderer.calculate_normal_color(ray.direction)
-			else:
-				nc = (0,0,0)
-			print(f"normal color: {nc}")
 
 if __name__ == "__main__":
 	main()

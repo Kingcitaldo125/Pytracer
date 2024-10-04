@@ -11,28 +11,6 @@ from utility import colors, random_hemisphere
 # References:
 # https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
-class Viewport:
-	def __init__(self, camerapos, window):
-		focal_length = 1
-		aspect_ratio = 16/16
-		winx, winy = window
-
-		self.image_width = winx
-		self.image_height = winy / aspect_ratio
-		self.image_height = 1 if self.image_height < 1 else self.image_height
-
-		self.viewport_u = pygame.math.Vector3(2, 0, 0)
-		self.viewport_v = pygame.math.Vector3(0, -2, 0)
-
-		self.delta_u = self.viewport_u / self.image_width
-		self.delta_v = self.viewport_v / self.image_height
-
-		upper_left = camerapos - pygame.math.Vector3(0, 0, focal_length)
-		upper_left = upper_left - self.viewport_u//2
-		upper_left = upper_left - self.viewport_v//2
-
-		self.pixel_location = upper_left + 0.5 * (self.delta_u + self.delta_v)
-
 class HitRecord:
 	def __init__(self):
 		self.front_face = False
@@ -49,9 +27,8 @@ class HitRecord:
 		self.normal = outward_normal if self.front_face else outward_normal * -1
 
 class Renderer:
-	def __init__(self, camerapos, viewport):
-		self.camerapos = camerapos
-		self.viewport = viewport
+	def __init__(self, camera):
+		self.camera = camera
 		self.objects = []
 		self.sphere_color = colors["red"]
 		self.zero_color_vector = pygame.math.Vector3(0.0,0.0,0.0)
@@ -162,16 +139,16 @@ class Renderer:
 	def render(self, screen, window, coord):
 		i,j = coord
 
-		# Calculate the position from the current viewport coord
+		# Calculate the position from the current coord
 		# to the origin of the casted ray
-		pixel_location = self.viewport.pixel_location
-		delta_u = self.viewport.delta_u
-		delta_v = self.viewport.delta_v
+		pixel_location = self.camera.pixel_location
+		delta_u = self.camera.delta_u
+		delta_v = self.camera.delta_v
 
 		pixel_center = pixel_location + (i * delta_u) + (j * delta_v)
 
 		# Create the ray
-		ray_origin = self.camerapos
+		ray_origin = self.camera.pos
 		ray_direction = pixel_center - ray_origin
 		ray = Ray(ray_origin, ray_direction.normalize(), 0)
 

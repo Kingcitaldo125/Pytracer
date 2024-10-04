@@ -59,7 +59,9 @@ class Glass(Material):
 	def reflectance(self, cos_theta, ri):
 		rtheta = (1 - ri) / (1 + ri)
 		rtheta_squared = rtheta * rtheta
-		return rtheta_squared + (1-rtheta_squared) * (1 - cos_theta)**5
+		neg_cos = (1 - cos_theta)
+		neg_theta = (1 - rtheta_squared)
+		return rtheta_squared + neg_theta * neg_cos**5
 
 	def scatter(self, ray_in, record):
 		ri = self.rf_idx_inv if record.front_face else self.refraction_idx
