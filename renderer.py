@@ -133,7 +133,7 @@ class Renderer:
 			return self.calculate_background_color(ray)
 
 		# Calculate surface color based on the object's material
-		scattered,attenuation = base_material.scatter(ray, record, True)
+		scattered,attenuation = base_material.scatter(ray, record)
 
 		scol = self.calculate_surf_color(scattered, interval)
 

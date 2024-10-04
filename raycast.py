@@ -72,15 +72,17 @@ def main(winx=500, winy=500):
 	# Materials
 	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
 	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
-	left_metal = material.Glass(1.0/1.33)
-	right_metal = material.Metal(pygame.math.Vector3(0.8,0.6,0.2))
+	left_glass = material.Glass(1.5)
+	right_metal = material.Metal(pygame.math.Vector3(0.8,0.6,0.2), fuzzy=True)
+	bubble = material.Glass(1.0/1.5)
 
-	s1 = Sphere(0.0,-100.5,-1.0,100,ground_metal)
-	s2 = Sphere(0.0,0.0,-1.2,0.5,center_metal)
-	s3 = Sphere(-1.0,0.0,-1.0,0.5,left_metal)
-	s4 = Sphere(1.0,0.0,-1.0,0.5,right_metal)
+	s1 = Sphere(0.0, -100.5, -1.0, 100, ground_metal)
+	s2 = Sphere(0.0, 0.0, -1.2, 0.5, center_metal)
+	s3 = Sphere(-1.0, 0.0, -1.0, 0.5, left_glass)
+	s4 = Sphere(1.0, 0.0, -1.0, 0.5, right_metal)
+	s5 = Sphere(-1.0, 0.0, -1.0, 0.4, bubble)
 
-	scene_geometry.extend([s1,s2,s3,s4])
+	scene_geometry.extend([s1,s2,s3,s4,s5])
 	#'''
 
 	for id,item in enumerate(scene_geometry):

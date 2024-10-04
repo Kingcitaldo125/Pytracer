@@ -12,6 +12,9 @@ colors = {
 	"black": (0,0,0)
 }
 
+def random_double(min, max):
+	return uniform(min, max)
+
 def random_color():
 	return (rr(0,255), rr(0,255), rr(0,255))
 
@@ -59,7 +62,8 @@ def reflect(vec, normal):
 	return vec - 2 * vec.dot(normal) * normal
 
 def refract(vec, normal, rprime):
-	cos_theta = min(-vec.dot(normal), 1.0)
+	vec_inverse = vec * -1
+	cos_theta = min(vec_inverse.dot(normal), 1.0)
 	r_perp = rprime * (vec + cos_theta * normal)
 
 	r_perp_mag = abs(1.0 - r_perp.length_squared())
