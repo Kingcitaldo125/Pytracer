@@ -1,7 +1,9 @@
 import pygame
 
+from math import sqrt
+
 from ray import Ray
-from utility import near_zero, random_vec_sphere, random_vec3_clamp, reflect
+from utility import near_zero, random_vec_sphere, random_vec3_clamp, reflect, refract
 
 
 class Material:
@@ -44,3 +46,29 @@ class Metal(Material):
 			ref_v.normalize_ip()
 
 		return [Ray(record.p, ref_v, ray_in.bounces + 1), self.albedo]
+
+class Glass(Material):
+	def __init__(self, refraction_idx):
+		super().__init__()
+		self.refraction_idx = refraction_idx
+		self.attenuation = pygame.math.Vector3(1.0,1.0,1.0)
+		self.type = "glass"
+
+	def scatter(self, ray_in, record, fuzzy=False):
+		ri = (1.0 / self.refraction_idx) if record.front_face else self.refraction_idx
+
+		unit_dir = ray_in.direction.normalize()
+		unit_dir_rev = unit_dir * -1
+
+		cos_theta = min(unit_dir_rev.dot(record.normal), 1.0)
+		sin_theta = sqrt(1.0 - cos_theta * cos_theta)
+
+		cannot_refract = ri * sin_theta > 1.0
+		direction = None
+
+		if cannot_refract:
+			direction = reflect(ray_in.direction, record.normal)
+		else:
+			direction = refract(unit_dir, record.normal, ri)
+
+		return [Ray(record.p, direction, ray_in.bounces + 1), self.attenuation]

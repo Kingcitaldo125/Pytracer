@@ -72,7 +72,7 @@ def main(winx=500, winy=500):
 	# Materials
 	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
 	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
-	left_metal = material.Metal(pygame.math.Vector3(0.8,0.8,0.8))
+	left_metal = material.Glass(1.0/1.33)
 	right_metal = material.Metal(pygame.math.Vector3(0.8,0.6,0.2))
 
 	s1 = Sphere(0.0,-100.5,-1.0,100,ground_metal)

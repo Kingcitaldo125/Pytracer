@@ -1,5 +1,7 @@
 import pygame
 
+from math import sqrt
+
 from random import randrange as rr
 from random import uniform
 
@@ -53,5 +55,14 @@ def near_zero(vec, scale=1e-8):
 
 	return vx < scale and vy < scale and vz < scale
 
-def reflect(vec,normal):
+def reflect(vec, normal):
 	return vec - 2 * vec.dot(normal) * normal
+
+def refract(vec, normal, rprime):
+	cos_theta = min(-vec.dot(normal), 1.0)
+	r_perp = rprime * (vec + cos_theta * normal)
+
+	r_perp_mag = abs(1.0 - r_perp.length_squared())
+	r_parallel = normal * sqrt(r_perp_mag) * -1
+
+	return r_perp + r_parallel
