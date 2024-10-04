@@ -88,8 +88,6 @@ class Renderer:
 
 	def calculate_surf_color(self, ray, interval, debug=False):
 		if ray.hit_limit():
-			if debug:
-				print('hit limit')
 			return self.zero_color_vector
 
 		record = HitRecord()
@@ -117,15 +115,8 @@ class Renderer:
 		rx = round(attenuation.x * scol.x, 1)
 		ry = round(attenuation.y * scol.y, 1)
 		rz = round(attenuation.z * scol.z, 1)
-		retcol = pygame.math.Vector3(rx,ry,rz)
 
-		if debug:
-			print(f"attenuation {attenuation}")
-			print(f"scol {scol}")
-			print(f"retcol {retcol}")
-			print('')
-
-		return retcol
+		return pygame.math.Vector3(rx,ry,rz)
 
 	def hit_anything(self, ray):
 		for object in self.objects:
@@ -149,8 +140,8 @@ class Renderer:
 
 		# Create the ray
 		ray_origin = self.camera.pos
-		ray_direction = pixel_center - ray_origin
-		ray = Ray(ray_origin, ray_direction.normalize(), 0)
+		ray_direction = (pixel_center - ray_origin).normalize()
+		ray = Ray(ray_origin, ray_direction, 0)
 
 		# Drop out of the geometry collision calculations
 		# if we didn't hit any objects of interest
@@ -165,7 +156,7 @@ class Renderer:
 			return
 
 		# Render objects
-		ray = Ray(ray_origin, ray_direction.normalize(), 0)
+		ray = Ray(ray_origin, ray_direction, 0)
 		pixel_color = pygame.math.Vector3(0,0,0)
 		for sample in range(self.samples_per_pixel):
 			surf_col = self.calculate_surf_color(ray, self.ray_interval)
@@ -175,15 +166,10 @@ class Renderer:
 			surf_col.y = int(surf_col.y)
 			surf_col.z = int(surf_col.z)
 
-			#print(f"surf_col {surf_col}")
 			pixel_color += surf_col
 
 		fx = pixel_color.x // self.samples_per_pixel
 		fy = pixel_color.y // self.samples_per_pixel
 		fz = pixel_color.z // self.samples_per_pixel
-
-		#print("fx", fx)
-		#print("fy", fy)
-		#print("fz", fz)
 
 		screen.set_at((i,j), (fx, fy, fz))

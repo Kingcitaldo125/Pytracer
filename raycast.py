@@ -17,7 +17,10 @@ def render_help(screen, window, scene_geometry):
 	global done
 
 	winx,winy = window
-	cam = Camera(pygame.math.Vector3(0,0,0), window)
+	#cam_pos = pygame.math.Vector3(0,0,0)
+	cam_pos = pygame.math.Vector3(-2,2,1)
+	cam_target = pygame.math.Vector3(0,0,-1)
+	cam = Camera(cam_pos, cam_target, window)
 	renderer = Renderer(cam)
 
 	do_alaising = False
@@ -65,7 +68,7 @@ def main(winx=500, winy=500):
 
 	scene_geometry = []
 
-	'''
+	#'''
 	# Materials
 	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
 	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
@@ -80,14 +83,7 @@ def main(winx=500, winy=500):
 	s5 = Sphere(-1.0, 0.0, -1.0, 0.4, bubble)
 
 	scene_geometry.extend([s1,s2,s3,s4,s5])
-	'''
-
-	red = material.Lambertian(pygame.math.Vector3(1.0,0.0,0.0))
-	blue = material.Lambertian(pygame.math.Vector3(0.0,0.0,1.0))
-	R = math.cos(math.pi/4)
-	s1 = Sphere(-R, 0.0, -1.0, R, blue)
-	s2 = Sphere(R, 0.0, -1.0, R, red)
-	scene_geometry.extend([s1,s2])
+	#'''
 
 	for id,item in enumerate(scene_geometry):
 		item.set_id(id + 1)
