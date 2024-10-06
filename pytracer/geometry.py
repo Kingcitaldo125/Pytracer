@@ -2,8 +2,8 @@ import pygame
 
 from math import sqrt
 
-from ray import Ray
-from utility import colors
+from pytracer.ray import Ray
+from pytracer.utility import colors
 
 
 class Object:

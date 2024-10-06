@@ -5,11 +5,10 @@ from random import randrange as rr
 from time import time
 from threading import Thread
 
-import material
-
-from renderer import Renderer
-from geometry import Sphere
-from camera import Camera
+from pytracer.camera import Camera
+from pytracer.geometry import Sphere
+from pytracer.material import Lambertian, Glass, Metal
+from pytracer.renderer import Renderer
 
 done = False
 
@@ -70,11 +69,11 @@ def main(winx=500, winy=500):
 
 	#'''
 	# Materials
-	ground_metal = material.Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
-	center_metal = material.Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
-	left_glass = material.Glass(1.5)
-	right_metal = material.Metal(pygame.math.Vector3(0.8,0.6,0.2), fuzzy=True)
-	bubble = material.Glass(1.0/1.5)
+	ground_metal = Lambertian(pygame.math.Vector3(0.8,0.8,0.0))
+	center_metal = Lambertian(pygame.math.Vector3(0.1,0.2,0.5))
+	left_glass = Glass(1.5)
+	right_metal = Metal(pygame.math.Vector3(0.8,0.6,0.2), fuzzy=True)
+	bubble = Glass(1.0/1.5)
 
 	s1 = Sphere(0.0, -100.5, -1.0, 100, ground_metal)
 	s2 = Sphere(0.0, 0.0, -1.2, 0.5, center_metal)
@@ -114,7 +113,3 @@ def main(winx=500, winy=500):
 	if repeat:
 		done = False
 		main(winx,winy)
-
-if __name__ == "__main__":
-	main()
-	#scratch()

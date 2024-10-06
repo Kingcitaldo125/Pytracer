@@ -2,11 +2,10 @@ import pygame
 
 from math import inf
 
-import material
-
-from ray import Ray
-from interval import Interval
-from utility import colors, random_hemisphere
+from pytracer.interval import Interval
+from pytracer.material import Material
+from pytracer.ray import Ray
+from pytracer.utility import colors, random_hemisphere
 
 # References:
 # https://raytracing.github.io/books/RayTracingInOneWeekend.html
@@ -15,7 +14,7 @@ class HitRecord:
 	def __init__(self):
 		self.front_face = False
 		self.normal = pygame.math.Vector3(0,0,0)
-		self.material = material.Material()
+		self.material = Material()
 		self.p = None
 		self.t = None
 
@@ -92,7 +91,7 @@ class Renderer:
 
 		record = HitRecord()
 		closest = interval.max
-		base_material = material.Material()
+		base_material = Material()
 		hit_something = False
 		for obj in self.objects:
 			ninterval = Interval(interval.min, closest)

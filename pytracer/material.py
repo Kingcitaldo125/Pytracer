@@ -2,8 +2,8 @@ import pygame
 
 from math import sqrt
 
-from ray import Ray
-from utility import near_zero, random_double, random_vec_sphere, random_vec3_clamp, reflect, refract
+from pytracer.ray import Ray
+from pytracer.utility import near_zero, random_double, random_vec_sphere, random_vec3_clamp, reflect, refract
 
 
 class Material:
